@@ -258,7 +258,7 @@
 
   </target>
 
-  <target name="compile" depends="compile-java,buildinfo" 
+  <target name="compile" depends="compile-java,compile-native,buildinfo" 
           description="Compile all">
   </target>
 
