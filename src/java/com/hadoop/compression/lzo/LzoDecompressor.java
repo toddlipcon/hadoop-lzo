@@ -297,6 +297,9 @@ class LzoDecompressor implements Decompressor {
 
       // Check if there is data to decompress
       if (compressedDirectBufLen <= 0) {
+	if (userBufLen <= 0 ) {
+	  finished = true;
+	}
         return 0;
       }
 
