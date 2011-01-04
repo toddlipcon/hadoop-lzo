@@ -84,6 +84,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.6</version>
         <executions>
           <execution>
             <id>clean</id>
@@ -103,7 +104,9 @@
               <target>
                 <mkdir dir="${build.native}/lib"/>
                 <mkdir dir="${build.native}/src/com/hadoop/compression/lzo"/>
-                
+                <exec dir="${basedir}" executable="javah" failonerror="true">
+                  <arg line="-classpath ${basedir}/target/classes -d ${build.native}/src/com/hadoop/compression/lzo -force -verbose com.hadoop.compression.lzo.LzoCompressor com.hadoop.compression.lzo.LzoDecompressor" />
+                </exec>
                 <javah classpath="${basedir}/target/classes"
                        destdir="${build.native}/src/com/hadoop/compression/lzo"
                        force="yes"
