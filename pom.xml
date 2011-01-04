@@ -188,13 +188,14 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <version>2.7.1</version>
         <configuration>
+          <forkMode>always</forkMode>
           <systemPropertyVariables>
             <test.build.data>${basedir}/target/test-classes/data</test.build.data>
             <hadoop.log.dir>${basedir}/target/surefire-reports/logs</hadoop.log.dir>
             <test.src.dir>${basedir}/src/test/java</test.src.dir>
             <hadoop.policy.file>hadoop-policy.xml</hadoop.policy.file>
-            <java.library.path>${build.native}/lib:${basedir}/lib/native/${build.platform}</java.library.path>
           </systemPropertyVariables>
+          <argLine>-Djava.library.path=${build.native}/lib:${basedir}/lib/native/${build.platform}</argLine>
           <forkedProcessTimeoutInSeconds>900</forkedProcessTimeoutInSeconds>
         </configuration>
       </plugin>
