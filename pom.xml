@@ -107,13 +107,6 @@
                 <exec dir="${basedir}" executable="javah" failonerror="true">
                   <arg line="-classpath ${basedir}/target/classes -d ${build.native}/src/com/hadoop/compression/lzo -force -verbose com.hadoop.compression.lzo.LzoCompressor com.hadoop.compression.lzo.LzoDecompressor" />
                 </exec>
-                <javah classpath="${basedir}/target/classes"
-                       destdir="${build.native}/src/com/hadoop/compression/lzo"
-                       force="yes"
-                       verbose="yes">
-                  <class name="com.hadoop.compression.lzo.LzoCompressor" />
-                  <class name="com.hadoop.compression.lzo.LzoDecompressor" />
-                </javah>
                 
                 <exec dir="${build.native}" executable="sh" failonerror="true">
                   <env key="OS_NAME" value="${os.name}"/>
