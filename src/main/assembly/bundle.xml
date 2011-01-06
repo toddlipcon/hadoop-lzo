@@ -1,0 +1,28 @@
+<assembly>
+  <id>hadoop-lzo-bundle</id>
+  <formats>
+    <format>tar.gz</format>
+  </formats>
+  <dependencySets>
+    <dependencySet>
+      <outputDirectory>lib</outputDirectory>
+      <fileMode>0664</fileMode>
+      <useTransitiveDependencies>false</useTransitiveDependencies>
+      <excludes>
+        <exclude>*:hadoop-core</exclude>
+      </excludes>
+    </dependencySet>
+  </dependencySets>
+  <fileSets>
+    <fileSet>
+      <outputDirectory>docs</outputDirectory>
+      <fileMode>0664</fileMode>
+      <directory>${project.build.directory}/site/apidocs</directory>
+    </fileSet>
+    <fileSet>
+      <outputDirectory>lib/native</outputDirectory>
+      <fileMode>0664</fileMode>
+      <directory>${build.native}/lib</directory>
+    </fileSet>
+  </fileSets>
+</assembly>
