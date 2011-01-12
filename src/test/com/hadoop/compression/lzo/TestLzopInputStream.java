@@ -21,14 +21,23 @@ package com.hadoop.compression.lzo;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.security.NoSuchAlgorithmException;
-
+import java.util.ArrayList;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ExecutorService;
 import junit.framework.TestCase;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.compress.CodecPool;
+import org.apache.hadoop.io.compress.Decompressor;
 
 /**
  * Test the LzopInputStream, making sure we get the same bytes when reading a compressed file through
@@ -135,5 +144,71 @@ public class TestLzopInputStream extends TestCase {
     
     textBr.close();
     lzoBr.close();
+  }
+
+  /**
+   * Test case that uses the codec like IFile.Reader does, calling close()
+   * on the input stream *after* returning the decompressor to the
+   * codec pool. This is a test that illustrates MAPREDUCE-2258
+   */
+  public void testMultiThreadIFileLike() throws Exception {
+    if (!GPLNativeCodeLoader.isNativeCodeLoaded()) {
+      LOG.warn("Cannot run this test without the native lzo libraries");
+      return;
+    }
+
+    Configuration conf = new Configuration();
+    final LzopCodec codec = new LzopCodec();
+    codec.setConf(conf);
+
+    File uncompressedFile = new File(inputDataPath,
+      bigFile);
+    final long uncompressedSize = uncompressedFile.length();
+
+    ExecutorService exec = Executors.newFixedThreadPool(30);
+    ArrayList<Future<Void>> futures = new ArrayList<Future<Void>>();
+    for (int i = 0; i < 100; i++) {
+      futures.add(exec.submit(new Callable<Void>() {
+        public Void call() throws Exception {
+          for (int j = 0; j < 100; j++) {
+            long numBytesRead = exerciseCodecFromPool(codec);
+            assertEquals(uncompressedSize, numBytesRead);
+          }
+          return null;
+        }
+      }));
+    }
+
+    for (Future<Void> f : futures) {
+      f.get();
+    }
+    exec.shutdown();
+  }
+
+  private long exerciseCodecFromPool(LzopCodec codec) throws Exception  {
+    File lzoFile = new File(inputDataPath,
+      bigFile + codec.getDefaultExtension());
+    InputStream is = new FileInputStream(lzoFile);
+
+    Decompressor decomp = CodecPool.getDecompressor(codec);
+    InputStream lzoIn = codec.createInputStream(is, decomp);
+
+    byte[] readData = new byte[1024];
+    long read = 0;
+    int n;
+    while ((n = lzoIn.read(readData)) > 0) {
+      read += n;
+    }
+
+    // Close the codec up in the same way that IFile.Reader.close does -
+    // this is probably wrong - see MAPREDUCE-2258
+    Thread.sleep(1);
+    decomp.reset();
+    Thread.sleep(1);
+    CodecPool.returnDecompressor(decomp);
+    Thread.sleep(1);
+    lzoIn.close();
+
+    return read;
   }
 }
