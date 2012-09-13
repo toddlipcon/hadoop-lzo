@@ -1,0 +1,21 @@
+While this package should work with any distribution of Hadoop, here
+we document the steps involved in getting it to work on CDH4.x
+
+Requirements:
+============
+
+1. CDH4.x 
+2. Oracle Java: 1.6.0.31 <= version < 1.7.x
+3. ant > 1.8.x
+4. liblzo2-dev (debian) / liblzo-devel (redhat) / lzp lzo2 (mac)
+
+Building the package:
+====================
+ant package
+
+Setting up CDH to use lzo
+=========================
+1. Copy build/hadoop-lzo-*.jar to the hadoop-libs directory 
+   (/usr/lib/hadoop/lib/ for default CDH4 installation)
+2. Copy build/native/Linux-*-*/lib/libgplcompression.* to hadoop-native-libs directory
+   (/usr/lib/hadoop/lib/native for default CDH4 installation)
